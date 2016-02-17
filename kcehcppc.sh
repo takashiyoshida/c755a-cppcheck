@@ -1,88 +1,21 @@
 #!/bin/sh
 
-# Files not under C755A repository
-# This list does not contain standard header/library
-# Some of the missing files may be automatically generated during compilation.
-#
-# all.h
-# alt_path.h
-# and.h
-# asc.h
-# ascconnection.h
-# BmfMessage.hh
-# cod.h
-# ctlcmd.h
-# dbm.h
-# errno.h
-# ggetopt.h ?
-# hgt.h
-# hrg.h
-# imgtmcpex_servier_i.hh
-# inter_record.h
-# km_record.h
-# manager.h
-# matb.h
-# mbo.h
-# num.h
-# ols.h
-# rtap/database.h
-# ssal.h
-# scadaorb.h
-# scs.h
-# scsaddress.h
-# scsalmext.h
-# scsimgmodule.h
-# scstimer.h
-# sta.h
-# sys.h
-# sys_pro.h
-# tbs.h
-# tcf.h
-# tcl.h
-# timb.h
-# tmcpex_server.hh
-# tmcpex_serverproxy.hh
-# tmc_agu.h
-# tmc_camino.h
-# tmc_cdv.h
-# tmc_cfg.h
-# tmc_cirpec.h
-# tmc_cirpem.h
-# tmc_cirpet.h
-# tmc_cycle.h
-# tmc_enclav.h
-# tmc_esta.h
-# tmc_hora.h
-# tmc_intersta.h
-# tmc_iti.h
-# tmc_launching.h
-# tmc_launchper.h
-# tmc_linea.h
-# tmc_man.h
-# tmc_manstage.h
-# tmc_pec.h
-# tmc_pem.h
-# tmc_period.h
-# tmc_pet.h
-# tmc_per.h
-# tmc_powerzone.h
-# tmc_ppf.h
-# tmc_ppl.h
-# tmc_regdata.h
-# tmc_subroute.h
-# tmc_tcf.h
-# tmc_trafdir.h
-# tmc_tren.h
-# tmc_stabling.h
-# tra_hor.h
-# trafic_i.h # Yes, it's actually spelled like this
-# trip_record.h
-# tvr.h
-# twp.h
-# utility.h
-# vel.h
+DEFAULT_CHECK="all"
+CHECK_LEVEL=""
+CHECK_PATH=.
 
-/usr/bin/env cppcheck --enable=all --force \
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 LEVEL [files or paths]"
+    echo "LEVEL: all, warning, style, performance, portability, information, unusedFunction, missingInclude"
+    exit 0
+elif [ $# -gt 0 ]; then
+    CHECK_LEVEL=$1
+    if [ $# -eq 2 ]; then
+        CHECK_PATH=$2
+    fi
+fi
+
+/usr/bin/env cppcheck --enable=${CHECK_LEVEL} --force \
     --library=tmc.cfg \
     -I ../hmi/Nel-gws/Project/NelVisu_new/NelVisu_new/src \
     -I ../mcs/bmf/col/orb/inc \
@@ -128,4 +61,4 @@
     -I trk/inc \
     -I trk/tst \
     -I twp/inc \
-    sup
+    ${CHECK_PATH}
