@@ -68,10 +68,6 @@ if [ "${SOURCES}" == "" ]; then
     SOURCES="."
 fi
 
-echo "CPPCHECK_LEVEL => ${CPPCHECK_LEVEL}"
-echo "OUTPUT_FORMAT => ${OUTPUT_FORMAT}"
-echo "SOURCES => ${SOURCES}"
-
 CPPCHECK="/usr/bin/env cppcheck"
 CPPCHECK_OPTIONS="--enable=${CPPCHECK_LEVEL} --force --library=c755a.cfg"
 
