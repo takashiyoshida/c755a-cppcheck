@@ -1,7 +1,8 @@
 #!/bin/sh
 
-DEFAULT_CHECK="all"
 CHECK_LEVEL=""
+
+# When no path is specified, it defaults to the current directory
 CHECK_PATH=.
 
 if [ $# -eq 0 ]; then
@@ -9,11 +10,18 @@ if [ $# -eq 0 ]; then
     echo "LEVEL: all, warning, style, performance, portability, information, unusedFunction, missingInclude"
     exit 0
 elif [ $# -gt 0 ]; then
+    # check level must be specified
     CHECK_LEVEL=$1
     if [ $# -eq 2 ]; then
+        # Assign files or paths when specified
         CHECK_PATH=$2
     fi
 fi
+
+# Even though this script has been made somewhat more flexible than before,
+# it is currently assumed to run from the tmc directory.
+# Thus, the -I (include files) paths are specified relative to the `tmc` directory.
+# In the future, this will be relative to the root of C755A source code.
 
 /usr/bin/env cppcheck --enable=${CHECK_LEVEL} --force \
     --library=tmc.cfg \
