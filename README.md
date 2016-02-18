@@ -1,30 +1,34 @@
 # c755a-cppcheck
 
-cppcheck configuration for C755A source code
+__c755a-cppcheck__ is a set of shell script and [cppcheck](https://github.com/danmar/cppcheck) configuration for C755A project.
 
 ## Requirement
 
-You must install [cppcheck](https://github.com/danmar/cppcheck/) version 1.72 or later.
+- [cppcheck](https://github.com/danmar/cppcheck) version 1.72 or later
 
-> I do not know if `cppcheck` can be built under RedHat Enterprise Linux 5.
-> The included script, `kcehcppc.sh`, and its configuration file were developed and tested under OS X El Capitan and Ubuntu.
-> You may be able to build `cppcheck` and use the `kcehcppc.sh` under your environment. If you are successful in doing so, please let me know.
+## Installation
 
-Install the script by copying `kcehcppc.sh` and `tmc.cfg` to `tmc` directory in your C755A source repository.
+Copy `kcehcppc.sh` and `c755a.cfg` files to the root of C755A source repository.
 
 ```bash
-% cp kcehcppc.sh tmc.cfg c755a-src/tmc
-% kcehcppc.sh all .
+cp kcehcppc.sh c755a.cfg c755a-src
 ```
 
-You can redirect the output from `cppcheck` to a separate file like this:
+## Running Script
 
 ```bash
-% kcehcppc.sh all . 2> cppcheck.log
+./kcehcppc.sh -l warning tmc/enc
 ```
 
-You can also specify different check level and path.
+You can redirect the output from `cppcheck` to a separate file like this.
 
 ```bash
-% kcehcppc.sh warning enc/src 2> cppcheck.log
+./kcehcppc.sh -l warning tmc/enc 2> cppcheck.txt
+```
+
+You can also produce `cppcheck` output in XML format so that you can use `cppcheck-htmlreport` with it.
+
+```bash
+./kcehcppc.sh -l warning -x tmc/enc 2> cppcheck.xml
+cppcheck-htmlreport --title="tmc/enc" --file=cppcheck.xml --report-dir=cppcheck
 ```

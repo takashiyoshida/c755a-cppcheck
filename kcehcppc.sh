@@ -1,72 +1,81 @@
 #!/bin/sh
 
-CHECK_LEVEL=""
+# Print ever useful ha(e)lp message
+print_halp()
+{
+    echo "Usage: `basename $0` -l LEVEL [-x] [files or paths]"
+    echo "  -l, --level       Equivalent to --enable in cppcheck"
+    echo "                    all, warning, style, performance, portability, information,"
+    echo "                    unusedFunction, missingInclude"
+    echo "  -x, --xml         When specified, equivalent to --xml-version=2 in cppcheck"
+    echo "  [files or paths]  A list of source files or directories containing source files"
+    echo "Example usage:"
+    echo "  `basename $0` -l warning -x 2> cppcheck.xml"
+}
 
-# When no path is specified, it defaults to the current directory
-CHECK_PATH=.
-
+# If no parameters are provided, print the ha(e)lp message and exit
 if [ $# -eq 0 ]; then
-    echo "Usage: $0 LEVEL [files or paths]"
-    echo "LEVEL: all, warning, style, performance, portability, information, unusedFunction, missingInclude"
+    print_halp
     exit 0
-elif [ $# -gt 0 ]; then
-    # check level must be specified
-    CHECK_LEVEL=$1
-    if [ $# -eq 2 ]; then
-        # Assign files or paths when specified
-        CHECK_PATH=$2
-    fi
 fi
 
-# Even though this script has been made somewhat more flexible than before,
-# it is currently assumed to run from the tmc directory.
-# Thus, the -I (include files) paths are specified relative to the `tmc` directory.
-# In the future, this will be relative to the root of C755A source code.
+# CPPCHECK_LEVEL: Equivalent to --enable option in `cppcheck`
+# It must be one of the following: all, warning, style, performance, portability,
+#                                  information, unusedFunction, missingInclude
+# This parameter is required
+unset CPPCHECK_LEVEL
 
-/usr/bin/env cppcheck --enable=${CHECK_LEVEL} --force \
-    --library=tmc.cfg \
-    -I ../hmi/Nel-gws/Project/NelVisu_new/NelVisu_new/src \
-    -I ../mcs/bmf/col/orb/inc \
-    -I ../mcs/bmf/inc \
-    -I ../mcs/scc/ala/ext/inc \
-    -I ../mcs/sig/ctl/orb/inc \
-    -I ../mdb/INCLUDE_MDB/INCLUDE_MDB_SHARE \
-    -I ../nel/inc \
-    -I ../nel/red/inc \
-    -I bmfint/inc \
-    -I classes/inc \
-    -I enc/inc \
-    -I enc/tst \
-    -I hor \
-    -I include \
-    -I integration \
-    -I lch/inc \
-    -I lch/tst \
-    -I lchint/inc \
-    -I mdbdef \
-    -I pex/inc \
-    -I pex/orb \
-    -I pex/tst \
-    -I pis/inc \
-    -I reg/inc \
-    -I reg/tst \
-    -I sal/inc \
-    -I sal/tst \
-    -I scsint/inc \
-    -I sigint/inc \
-    -I sta/inc \
-    -I stb/inc \
-    -I stb/tst \
-    -I stbint/inc \
-    -I stub/include \
-    -I stub/telcom \
-    -I sup/inc \
-    -I sup/orb \
-    -I tcl/include \
-    -I tgtint/inc \
-    -I tools/inc \
-    -I tra \
-    -I trk/inc \
-    -I trk/tst \
-    -I twp/inc \
-    ${CHECK_PATH}
+# OUTPUT_FORMAT: When specified, it is equivalent to --xml-version option
+#                in `cppcheck`
+# This parameter is not required
+OUTPUT_FORMAT=""
+
+# SOURCES: A list of source files or paths containing source files
+unset SOURCES
+
+while [ "$1" != "" ]; do
+    case $1 in
+        -l | --level )
+            shift
+            CPPCHECK_LEVEL=$1
+            ;;
+        -x | --xml )
+            OUTPUT_FORMAT="--xml-version=2"
+            ;;
+        -h | --help )
+            print_halp
+            exit 0
+            ;;
+        * )
+            if [ -z "${CPPCHECK_LEVEL+x}" ]; then
+                print_halp
+                exit 1
+            else
+                SOURCES="${SOURCES} $1"
+            fi
+    esac
+    shift
+done
+
+# CPPCHECK_LEVEL must be specified
+if [ -z "${CPPCHECK_LEVEL+x}" ]; then
+    print_halp
+    exit 1
+fi
+
+# If no source files or paths were specified, set it to the current directory
+if [ "${SOURCES}" == "" ]; then
+    SOURCES="."
+fi
+
+CPPCHECK="/usr/bin/env cppcheck"
+CPPCHECK_OPTIONS="--enable=${CPPCHECK_LEVEL} --force --library=c755a.cfg"
+
+# Build a string of -I (include path) for `cppcheck` to use
+unset INCLUDES
+for dir in `find ${PWD} -name "*.h*" -exec dirname {} \; | sort -u`; do
+    INCLUDES="${INCLUDES} -I ${dir}"
+done
+
+echo "Executing ${CPPCHECK} ${CPPCHECK_OPTIONS} ${OUTPUT_FORMAT} ${INCLUDES} ${SOURCES}"
+${CPPCHECK} ${CPPCHECK_OPTIONS} ${OUTPUT_FORMAT} ${INCLUDES} ${SOURCES}
